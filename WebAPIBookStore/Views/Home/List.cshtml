@@ -1,0 +1,218 @@
+﻿@model IList<Domain.Book>
+
+@{
+    ViewBag.Title = "List";
+}
+
+<table class="ui-widget ui-state-default ui-corner-all" id="tab1">
+    <thead class="ui-widget-header">
+        <tr>
+            <th style="width: 40px">
+                ID
+            </th>
+            <th style="width: 290px">
+                Nome
+            </th>
+            <th style="width: 200px">
+                Autor
+            </th>
+            <th style="width:70px">
+                Páginas
+            </th>
+            <th style="width: 50px">
+                Ano
+            </th>
+            <th style="width: 110px">
+                Idioma
+            </th>
+            <th style="width: 110px">
+                Marca
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Id)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Author)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.NumberPages)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Year)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Language)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Brand)
+            </td>
+            <td>
+                <button class="btn-delete ui-state-default ui-corner-all" data-id="@item.Id">
+                    <span class="ui-icon ui-icon-trash" />
+                </button>
+                <button class="btn-edit ui-state-default ui-corner-all" data-id="@item.Id" data-name="@item.Name" data-author="@item.Author" data-numberPages="@item.NumberPages" data-Year="@item.Year" data-language="@item.Language" data-brand="@item.Brand">
+                    <span class="ui-icon ui-icon-pencil" />
+                </button>
+            </td>
+        </tr>
+    }
+</table>
+<br />
+<table border="0" cellpadding="0" cellspacing="0">
+    <tr>
+        <td style="width: 50px">
+            Id<br />
+            <input type="text" id="txtId" name="txtId" style="width:40px" disabled="disabled" />
+        </td>
+        <td style="width: 290px">
+            Nome<br />
+            <input type="text" id="txtName" name="txtName" maxlength="150" style="width:340px" />
+        </td>
+        <td style="width: 200px">
+            Autor<br />
+            <input type="text" id="txtAuthor" name="txtAuthor" maxlength="150" style="width:190px" />
+        </td>
+        <td style="width: 70px">
+            Páginas<br />
+            <input type="text" id="txtNumberPages" name="txtNumberPages" maxlength="5" style="width:60px" />
+        </td>
+        <td style="width: 50px">
+            Ano<br />
+            <input type="text" id="txtYear" name="txtYear" maxlength="4" style="width:40px" />
+        </td>
+        <td style="width: 110px">
+            Idioma<br />
+            <input type="text" id="txtLanguage" name="txtLanguage" maxlength="150" style="width:100px" />
+        </td>
+        <td style="width: 110px">
+            Marca<br />
+            <input type="text" id="txtBrand" name="txtBrand" maxlength="150" style="width:100px" />
+        </td>
+        <td style="width: 100px">
+            <br />
+            <button class="ui-state-default ui-corner-all btn-create">
+                <span class="ui-icon ui-icon-plus" />
+            </button>
+            <button class="ui-state-default ui-corner-all btn-update">
+                <span class="ui-icon ui-icon-disk" />
+            </button>
+            <button class="ui-state-default ui-corner-all btn-clear">
+                <span class="ui-icon ui-icon-cancel" />
+            </button>
+        </td>
+    </tr>
+</table>
+<br />
+
+<script>
+    $(document).ready(function () {
+
+        $(".btn-create").show();
+        $(".btn-update").hide();
+
+        $(".btn-create").click(function () {
+            var Name = $("#txtName").val();
+            var Author = $("#txtAuthor").val();
+            var NumberPages = $("#txtNumberPages").val();
+            var Year = $("#txtYear").val();
+            var Language = $("#txtLanguage").val();
+            var Brand = $("#txtBrand").val();
+            $.ajax({
+                type: "POST",
+                contentType: "application/json;charset=utf-8",
+                url: "/api/Book/",
+                data: JSON.stringify({
+                    Name: Name,
+                    Author: Author,
+                    NumberPages: NumberPages,
+                    Year: Year,
+                    Language: Language,
+                    Brand: Brand
+                }),
+                dataType: "JSON",
+                success: (function () {
+                    $("#divBooks").load("/Home/List");
+                })
+            });
+        });
+
+        $(".btn-delete").click(function () {
+            if (confirm("Você tem certeza que deseja deletar este livro?")) {
+                var Id = $(this).attr("data-id");
+                $.ajax({
+                    type: "DELETE",
+                    contentType: "application/json;charset=utf-8",
+                    url: "/api/Book/" + Id,
+                    data: JSON.stringify({
+                        Id: $("#Id").val()
+                    }),
+                    dataType: "JSON",
+                    success: (function () {
+                        $("#divBooks").load("/Home/List");
+                    })
+                });
+            }
+        });
+
+        $(".btn-edit").click(function () {
+            var Id = $(this).attr("data-id");
+            var Name = $(this).attr("data-name");
+            var Author = $(this).attr("data-author");
+            var NumberPages = $(this).attr("data-numberPages");
+            var Year = $(this).attr("data-year");
+            var Language = $(this).attr("data-language");
+            var Brand = $(this).attr("data-brand");
+            $("#txtId").val(Id);
+            $("#txtName").val(Name);
+            $("#txtAuthor").val(Author);
+            $("#txtNumberPages").val(NumberPages);
+            $("#txtYear").val(Year);
+            $("#txtLanguage").val(Language);
+            $("#txtBrand").val(Brand);
+            $(".btn-create").hide();
+            $(".btn-update").show();
+        });
+
+        $(".btn-update").click(function () {
+            var Id = $("#txtId").val();
+            var Name = $("#txtName").val();
+            var Author = $("#txtAuthor").val();
+            var NumberPages = $("#txtNumberPages").val();
+            var Year = $("#txtYear").val();
+            var Language = $("#txtLanguage").val();
+            var Brand = $("#txtBrand").val();
+            $.ajax({
+                type: "put",
+                contentType: "application/json;charset=utf-8",
+                url: "/api/Book/" + Id,
+                data: JSON.stringify({
+                    Id: Id,
+                    Name: Name,
+                    Author: Author,
+                    NumberPages: NumberPages,
+                    Year: Year,
+                    Language: Language,
+                    Brand: Brand
+                }),
+                dataType: "JSON",
+                success: (function () {
+                    $("#divBooks").load("/Home/List");
+                })
+            });
+        });
+
+        $(".btn-clear").click(function () {
+            $("#divBooks").load("/Home/List");
+        });
+    });
+
+</script>
